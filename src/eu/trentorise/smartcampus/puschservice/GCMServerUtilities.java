@@ -24,7 +24,7 @@ import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
 
-import eu.trentorise.smartcampus.protocolcarrier.common.Constants;
+
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
 
@@ -38,8 +38,7 @@ public final class GCMServerUtilities {
 	private static final int BACKOFF_MILLI_SECONDS = 2000;
 	private static final Random random = new Random();
 
-	// private static SCAccessProvider accessProvider = new
-	// AMSCAccessProvider();
+	
 	private static String token;
 
 	public GCMServerUtilities() {
@@ -55,7 +54,7 @@ public final class GCMServerUtilities {
 		Log.i(TAG, "registering device (regId = " + regId + ")");
 		// accessProvider = new AMSCAccessProvider();
 		// setToken(accessProvider.readToken(context, null));
-		setToken("aee58a92-d42d-42e8-b55e-12e4289586fc");
+	
 		String serverUrl = PushServiceCostant.SERVER_URL + "/register/user/"
 				+ PushServiceCostant.APP_NAME;
 		Map<String, String> params = new HashMap<String, String>();
@@ -153,7 +152,7 @@ public final class GCMServerUtilities {
 		HttpGet request = new HttpGet();
 		try {
 			request.setURI(new URI(endpoint));
-			request.setHeader(Constants.RequestHeader.AUTH_TOKEN.toString(),
+			request.setHeader("AUTH_TOKEN".toString(),
 					token);
 			request.setHeader("REGISTRATIONID", regId);
 		} catch (URISyntaxException e) {
@@ -163,7 +162,7 @@ public final class GCMServerUtilities {
 
 	}
 
-	private static void post(String endpoint, Map<String, String> params,
+	public static void post(String endpoint, Map<String, String> params,
 			String regId) throws IOException {
 		URL url;
 		try {
@@ -192,7 +191,7 @@ public final class GCMServerUtilities {
 			conn.setUseCaches(false);
 			conn.setFixedLengthStreamingMode(bytes.length);
 			conn.setRequestMethod("POST");
-			conn.setRequestProperty("AUTH_TOKEN", token);
+			conn.setRequestProperty("AUTH_TOKEN", PushServiceCostant.mToken);
 			conn.setRequestProperty("REGISTRATIONID", regId);
 
 			StrictMode.ThreadPolicy policy = new

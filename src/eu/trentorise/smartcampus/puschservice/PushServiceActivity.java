@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
@@ -24,16 +23,13 @@ public class PushServiceActivity extends Activity {
 	
 	AsyncTask<Void, Void, Void> mRegisterTask;
 	
+	private String regId;
+	
 	Context context ;
 	
-	public void init(String serverurl,String sendeid,String appname){
-		new PushServiceCostant(sendeid,serverurl,appname);
-	}
+	public void init(String serverurl,String sendeid,String appname,String mToken){
+		new PushServiceCostant(sendeid,serverurl,appname,mToken);
 	
-	
-	@Override
-    public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
         checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
         checkNotNull(PushServiceCostant.SENDER_ID, "SENDER_ID");
         // Make sure the device has the proper dependencies.
@@ -44,7 +40,7 @@ public class PushServiceActivity extends Activity {
        context=getApplicationContext();
        
         registerReceiver(mHandleMessageReceiver, new IntentFilter(DISPLAY_MESSAGE_ACTION));
-        final String regId = GCMRegistrar.getRegistrationId(this);
+        regId = GCMRegistrar.getRegistrationId(this);
         if (regId.equals("")) {
             // Automatically registers application on startup.
             GCMRegistrar.register(this, PushServiceCostant.SENDER_ID);
@@ -96,6 +92,11 @@ public class PushServiceActivity extends Activity {
     }
 	
 	
+	@Deprecated
+	protected void unRegisterPush(){
+		//only for test
+				GCMServerUtilities.unregister(context, regId);
+	}
 
 	@Override
 	protected void onDestroy() {
@@ -103,6 +104,8 @@ public class PushServiceActivity extends Activity {
 			mRegisterTask.cancel(true);
 		}
 		unregisterReceiver(mHandleMessageReceiver);
+		
+		
 		GCMRegistrar.onDestroy(context);
 		super.onDestroy();
 	}
@@ -125,24 +128,8 @@ public class PushServiceActivity extends Activity {
 	 static final String DISPLAY_MESSAGE_ACTION =
 	            "com.google.android.gcm.demo.app.DISPLAY_MESSAGE";
 
-	    /**
-	     * Intent's extra that contains the message to be displayed.
-	     */
-	    static final String EXTRA_MESSAGE = "message";
 
-	    /**
-	     * Notifies UI to display a message.
-	     * <p>
-	     * This method is defined in the common helper because it's used both by
-	     * the UI and the background service.
-	     *
-	     * @param context application's context.
-	     * @param message message to be displayed.
-	     */
-	    static void displayMessage(Context context, String message) {
-	        Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
-	        intent.putExtra(EXTRA_MESSAGE, message);
-	        context.sendBroadcast(intent);
-	    }
+
+	  
 
 }

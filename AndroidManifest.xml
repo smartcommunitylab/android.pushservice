@@ -87,6 +87,11 @@
                 android:value="557126495282" />
              <meta-data android:name="SERVER_URL" android:value="" />
         </service>
+        
+        <meta-data
+                android:name="SENDER_ID"
+                android:value="557126495282" />
+             <meta-data android:name="SERVER_URL" android:value="" />
     </application>
 
 </manifest>
