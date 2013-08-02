@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
 
+import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
 
@@ -27,9 +28,9 @@ public class PushServiceActivity extends Activity {
 	
 	Context context ;
 	
-	public void init(String serverurl,String sendeid,String appname,String mToken){
-		new PushServiceCostant(sendeid,serverurl,appname,mToken);
-	
+	public void init() throws CommunicatorConnectorException{
+		new GCMServerUtilities();
+				
         checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
         checkNotNull(PushServiceCostant.SENDER_ID, "SENDER_ID");
         // Make sure the device has the proper dependencies.

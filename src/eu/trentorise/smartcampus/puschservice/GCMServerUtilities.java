@@ -25,6 +25,9 @@ import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 
 
+import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
+import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
+import eu.trentorise.smartcampus.communicator.model.UserSignature;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
 
@@ -40,9 +43,17 @@ public final class GCMServerUtilities {
 
 	
 	private static String token;
+	
+	private static CommunicatorConnector communicatorConnector;
 
-	public GCMServerUtilities() {
 
+
+	public GCMServerUtilities() throws CommunicatorConnectorException {
+		communicatorConnector = new CommunicatorConnector(
+				PushServiceCostant.SERVER_URL, PushServiceCostant.APP_NAME);
+		Map<String, Object> initMap=communicatorConnector.requestAppConfigurationToPush(PushServiceCostant.APP_NAME, PushServiceCostant.CLIENT_AUTH_TOKEN);
+		
+		PushServiceCostant.setConfigurationMap(initMap);
 	}
 
 	/**
@@ -55,8 +66,7 @@ public final class GCMServerUtilities {
 		// accessProvider = new AMSCAccessProvider();
 		// setToken(accessProvider.readToken(context, null));
 	
-		String serverUrl = PushServiceCostant.SERVER_URL + "/register/user/"
-				+ PushServiceCostant.APP_NAME;
+		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("regId", regId);
 		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
@@ -68,12 +78,18 @@ public final class GCMServerUtilities {
 			try {
 				Log.i(TAG, context.getString(R.string.server_registering, i,
 						MAX_ATTEMPTS));
-				post(serverUrl, params, regId);
+				
+				UserSignature userSignature=new UserSignature();
+				userSignature.setAppName(PushServiceCostant.APP_NAME);
+				userSignature.setRegistrationId(regId);
+				
+				communicatorConnector.registerUserToPush(PushServiceCostant.APP_NAME, userSignature,PushServiceCostant.USER_AUTH_TOKEN );
+				//post(serverUrl, params, regId);
 				GCMRegistrar.setRegisteredOnServer(context, true);
 				String message = context.getString(R.string.server_registered);
 				Log.i(TAG, message);
 				return true;
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// Here we are simplifying and retrying on any error; in a real
 				// application, it should retry only on unrecoverable errors
 				// (like HTTP error code 503).
@@ -105,16 +121,17 @@ public final class GCMServerUtilities {
 	 */
 	static void unregister(final Context context, final String regId) {
 
-		String serverUrl = PushServiceCostant.SERVER_URL + "unregister/user/"
-				+ PushServiceCostant.APP_NAME;
+		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("regId", regId);
 		try {
-			post(serverUrl, params, regId);
+			
+			communicatorConnector.unregisterUserToPush(PushServiceCostant.APP_NAME, PushServiceCostant.USER_AUTH_TOKEN);
+			//post(serverUrl, params, regId);
 			GCMRegistrar.setRegisteredOnServer(context, false);
 			String message = context.getString(R.string.server_unregistered);
 			Log.i(TAG, message);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// At this point the device is unregistered from GCM, but still
 			// registered in the server.
 			// We could try to unregister again, but it is not necessary:
@@ -127,96 +144,96 @@ public final class GCMServerUtilities {
 		}
 	}
 
-	/**
-	 * Issue a POST request to the server.
-	 * 
-	 * @param endpoint
-	 *            POST address.
-	 * @param params
-	 *            request parameters.
-	 * 
-	 * @throws IOException
-	 *             propagated from POST.
-	 */
-	private static void get(String endpoint, Map<String, String> params,
-			String regId) throws IOException {
+//	/**
+//	 * Issue a POST request to the server.
+//	 * 
+//	 * @param endpoint
+//	 *            POST address.
+//	 * @param params
+//	 *            request parameters.
+//	 * 
+//	 * @throws IOException
+//	 *             propagated from POST.
+//	 */
+//	private static void get(String endpoint, Map<String, String> params,
+//			String regId) throws IOException {
+//
+//		@SuppressWarnings("unused")
+//		URL url;
+//		try {
+//			url = new URL(endpoint);
+//		} catch (MalformedURLException e) {
+//			throw new IllegalArgumentException("invalid url: " + endpoint);
+//		}
+//		HttpClient client = new DefaultHttpClient();
+//		HttpGet request = new HttpGet();
+//		try {
+//			request.setURI(new URI(endpoint));
+//			request.setHeader("AUTH_TOKEN".toString(),
+//					token);
+//			request.setHeader("REGISTRATIONID", regId);
+//		} catch (URISyntaxException e) {
+//			Log.e(TAG, e.getMessage());
+//		}
+//		HttpResponse response = client.execute(request);
+//
+//	}
 
-		@SuppressWarnings("unused")
-		URL url;
-		try {
-			url = new URL(endpoint);
-		} catch (MalformedURLException e) {
-			throw new IllegalArgumentException("invalid url: " + endpoint);
-		}
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet();
-		try {
-			request.setURI(new URI(endpoint));
-			request.setHeader("AUTH_TOKEN".toString(),
-					token);
-			request.setHeader("REGISTRATIONID", regId);
-		} catch (URISyntaxException e) {
-			Log.e(TAG, e.getMessage());
-		}
-		HttpResponse response = client.execute(request);
-
-	}
-
-	public static void post(String endpoint, Map<String, String> params,
-			String regId) throws IOException {
-		URL url;
-		try {
-			url = new URL(endpoint);
-		} catch (MalformedURLException e) {
-			throw new IllegalArgumentException("invalid url: " + endpoint);
-		}
-		StringBuilder bodyBuilder = new StringBuilder();
-		Iterator<Entry<String, String>> iterator = params.entrySet().iterator();
-		// constructs the POST body using the parameters
-		while (iterator.hasNext()) {
-			Entry<String, String> param = iterator.next();
-			bodyBuilder.append(param.getKey()).append('=')
-					.append(param.getValue());
-			if (iterator.hasNext()) {
-				bodyBuilder.append('&');
-			}
-		}
-		String body = bodyBuilder.toString();
-		Log.v(TAG, "Posting '" + body + "' to " + url);
-		byte[] bytes = body.getBytes();
-		HttpURLConnection conn = null;
-		try {
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setDoOutput(true);
-			conn.setUseCaches(false);
-			conn.setFixedLengthStreamingMode(bytes.length);
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("AUTH_TOKEN", PushServiceCostant.mToken);
-			conn.setRequestProperty("REGISTRATIONID", regId);
-
-			StrictMode.ThreadPolicy policy = new
-					StrictMode.ThreadPolicy.Builder()
-					.permitAll().build();
-					StrictMode.setThreadPolicy(policy);
-
-			conn.connect();
-			// post the request
-			OutputStream out = conn.getOutputStream();
-			out.write(bytes);
-			out.close();
-			// handle the response
-			int status = conn.getResponseCode();
-			if (status != 200) {
-				throw new IOException("Post failed with error code " + status);
-			}
-		} catch (Exception e) {
-			Log.v(TAG,e.getMessage());
-		} finally {
-			if (conn != null) {
-				conn.disconnect();
-			}
-		}
-	}
+//	public static void posts(String endpoint, Map<String, String> params,
+//			String regId) throws IOException {
+//		URL url;
+//		try {
+//			url = new URL(endpoint);
+//		} catch (MalformedURLException e) {
+//			throw new IllegalArgumentException("invalid url: " + endpoint);
+//		}
+//		StringBuilder bodyBuilder = new StringBuilder();
+//		Iterator<Entry<String, String>> iterator = params.entrySet().iterator();
+//		// constructs the POST body using the parameters
+//		while (iterator.hasNext()) {
+//			Entry<String, String> param = iterator.next();
+//			bodyBuilder.append(param.getKey()).append('=')
+//					.append(param.getValue());
+//			if (iterator.hasNext()) {
+//				bodyBuilder.append('&');
+//			}
+//		}
+//		String body = bodyBuilder.toString();
+//		Log.v(TAG, "Posting '" + body + "' to " + url);
+//		byte[] bytes = body.getBytes();
+//		HttpURLConnection conn = null;
+//		try {
+//			conn = (HttpURLConnection) url.openConnection();
+//			conn.setDoOutput(true);
+//			conn.setUseCaches(false);
+//			conn.setFixedLengthStreamingMode(bytes.length);
+//			conn.setRequestMethod("POST");
+//			conn.setRequestProperty("AUTH_TOKEN", PushServiceCostant.mToken);
+//			conn.setRequestProperty("REGISTRATIONID", regId);
+//
+//			StrictMode.ThreadPolicy policy = new
+//					StrictMode.ThreadPolicy.Builder()
+//					.permitAll().build();
+//					StrictMode.setThreadPolicy(policy);
+//
+//			conn.connect();
+//			// post the request
+//			OutputStream out = conn.getOutputStream();
+//			out.write(bytes);
+//			out.close();
+//			// handle the response
+//			int status = conn.getResponseCode();
+//			if (status != 200) {
+//				throw new IOException("Post failed with error code " + status);
+//			}
+//		} catch (Exception e) {
+//			Log.v(TAG,e.getMessage());
+//		} finally {
+//			if (conn != null) {
+//				conn.disconnect();
+//			}
+//		}
+//	}
 
 	public String getToken() {
 		return token;

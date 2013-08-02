@@ -20,7 +20,7 @@ public abstract class GCMIntentServiceExtended extends GCMBaseIntentService {
 
 	private static final String TAG = "GCMIntentService";
 	
-	public GCMIntentServiceExtended() {
+	public GCMIntentServiceExtended() {		
 		super(PushServiceCostant.SENDER_ID);
 	}
 
