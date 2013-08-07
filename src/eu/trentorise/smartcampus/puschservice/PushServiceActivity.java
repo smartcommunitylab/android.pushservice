@@ -19,6 +19,7 @@ import android.util.Log;
 
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
+import eu.trentorise.smartcampus.communicator.model.UserSignature;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
 
@@ -67,18 +68,16 @@ public class PushServiceActivity extends Activity {
 	public void init() throws CommunicatorConnectorException, IOException {
 		cloudMessaging = GoogleCloudMessaging
 				.getInstance(getApplicationContext());
-		Map<String, Object> a = mConnector.requestAppConfigurationToPush(
-				PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
+		
 
-		// new GCMServerUtilities();
+		
 
 		checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
-		checkNotNull(PushServiceCostant.SENDER_ID, "SENDER_ID");
-		// Make sure the device has the proper dependencies.
-		// GCMRegistrar.checkDevice(context);
-		// // Make sure the manifest was properly set - comment out this line
-		// // while developing the app, then uncomment it when it's ready.
-		// GCMRegistrar.checkManifest(context);
+		Map<String, Object> mapKey = mConnector.requestAppConfigurationToPush(
+				PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
+		//set senderid
+		PushServiceCostant.setConfigurationMap(mapKey);
+	
 
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
@@ -91,7 +90,13 @@ public class PushServiceActivity extends Activity {
 				try {
 					regId = cloudMessaging
 							.register(PushServiceCostant.SENDER_ID);
-				} catch (IOException e) {
+					if (regId!=null){
+						UserSignature signUserSignature=new UserSignature();
+						signUserSignature.setAppName(APP_ID);
+						signUserSignature.setRegistrationId(regId);
+						mConnector.registerUserToPush(APP_ID, signUserSignature, PushServiceCostant.USER_AUTH_TOKEN);
+					}
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -107,59 +112,10 @@ public class PushServiceActivity extends Activity {
 			}
 
 		}.execute();
-		// if (regId.equals("")) {
-		// // Automatically registers application on startup.
-		// GCMRegistrar.register(context, PushServiceCostant.SENDER_ID);
-		// } else {
-		// // Device is already registered on GCM, check server.
-		// if (GCMRegistrar.isRegisteredOnServer(context)) {
-		// // Skips registration.
-		//
-		// Log.i(TAG, context.getString(R.string.already_registered)
-		// + "\n");
-		//
-		// } else {
-		// // Try to register again, but not in the UI thread.
-		// // It's also necessary to cancel the thread onDestroy(),
-		// // hence the use of AsyncTask instead of a raw thread.
-		//
-		// mRegisterTask = new AsyncTask<Void, Void, Void>() {
-		//
-		// @Override
-		// protected Void doInBackground(Void... params) {
-		//
-		// boolean registered = GCMServerUtilities.register(
-		// context, regId);
-		// // At this point all attempts to register with the app
-		// // server failed, so we need to unregister the device
-		// // from GCM - the app will try to register again when
-		// // it is restarted. Note that GCM will send an
-		// // unregistered callback upon completion, but
-		// // GCMIntentService.onUnregistered() will ignore it.
-		// if (!registered) {
-		// GCMServerUtilities.unregister(context, regId);
-		// GCMRegistrar.unregister(context);
-		// }
-		// return null;
-		// }
-		//
-		// @Override
-		// protected void onPostExecute(Void result) {
-		// mRegisterTask = null;
-		// }
-		//
-		// };
-		// mRegisterTask.execute(null, null, null);
-		// }
-		//
-		// }
+		
 	}
 
-	// @Deprecated
-	// protected void unRegisterPush() {
-	// // only for test
-	// GCMServerUtilities.unregister(context, regId);
-	// }
+
 
 	public void destroy() {
 		if (mRegisterTask != null) {
