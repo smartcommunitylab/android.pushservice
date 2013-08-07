@@ -50,37 +50,28 @@ public class PushServiceActivity {
 			Bundle bundle = ai.metaData;
 			APP_ID = "clientname";//bundle.getString("APP_ID");
 			SERVER_URL = "https://vas-dev.smartcampuslab.it/core.communicator";//bundle.getString("SERVER_URL");
-			mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
+			try {
+				mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		} catch (NameNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		cloudMessaging = GoogleCloudMessaging.getInstance(context);
 
 		checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
-		Map<String, Object> mapKey = null;
 		
 		
-		//solo per test
-		AppSignature signature = new AppSignature();
-		signature.setApiKey("AIzaSyCW1Vr4LKs22qrFWBwXX0DC_ckEB20YgEY");
-		signature.setAppId(APP_ID);
-		signature.setSenderId("499940284623");
-		mConnector.registerApp(signature,
-				APP_ID, PushServiceCostant.CLIENT_AUTH_TOKEN);
 		
-		//solo per test
+	
 		
-		try {
-			mapKey = mConnector.requestAppConfigurationToPush(
-					PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		// set senderid
-		PushServiceCostant.setConfigurationMap(mapKey);
 
 		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
@@ -91,6 +82,29 @@ public class PushServiceActivity {
 			protected Void doInBackground(Void... params) {
 				// TODO Auto-generated method stub
 				try {
+					
+					Map<String, Object> mapKey = null;
+					//solo per test
+					AppSignature signature = new AppSignature();
+					signature.setApiKey("AIzaSyCW1Vr4LKs22qrFWBwXX0DC_ckEB20YgEY");
+					signature.setAppId(APP_ID);
+					signature.setSenderId("499940284623");
+					mConnector.registerApp(signature,
+							APP_ID, PushServiceCostant.CLIENT_AUTH_TOKEN);
+					
+					//solo per test
+					
+					try {
+						mapKey = mConnector.requestAppConfigurationToPush(
+								PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					// set senderid
+					//PushServiceCostant.setConfigurationMap(mapKey);
+					
 					regId = cloudMessaging
 							.register(PushServiceCostant.SENDER_ID);
 					if (regId != null) {
