@@ -1,11 +1,8 @@
 package eu.trentorise.smartcampus.puschservice;
 
-import java.io.IOException;
 import java.util.Map;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import android.app.Activity;
+import junit.framework.Assert;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +14,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
+import eu.trentorise.smartcampus.communicator.model.AppSignature;
 import eu.trentorise.smartcampus.communicator.model.UserSignature;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
@@ -26,7 +26,7 @@ import eu.trentorise.smartcampus.pushservice.R;
 /**
  * Main UI for the demo app.
  */
-public class PushServiceActivity extends Activity {
+public class PushServiceActivity {
 
 	private static final String TAG = "PushServiceActivity";
 
@@ -36,50 +36,53 @@ public class PushServiceActivity extends Activity {
 
 	private GoogleCloudMessaging cloudMessaging;
 	private CommunicatorConnector mConnector;
+	private Context context;
 
 	private static String APP_ID;
 	private static String SERVER_URL;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);
+	public void init(Context cnt) throws CommunicatorConnectorException {
+		context = cnt;
 		ApplicationInfo ai;
 		try {
-			ai = getPackageManager().getApplicationInfo(
-					getPackageName(), PackageManager.GET_META_DATA);
+			ai = context.getPackageManager().getApplicationInfo(
+					context.getPackageName(), PackageManager.GET_META_DATA);
 			Bundle bundle = ai.metaData;
-			APP_ID = bundle.getString("APP_ID");
-			SERVER_URL = bundle.getString("SERVER_URL");
+			APP_ID = "clientname";//bundle.getString("APP_ID");
+			SERVER_URL = "https://vas-dev.smartcampuslab.it/core.communicator";//bundle.getString("SERVER_URL");
 			mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
-			init();
+
 		} catch (NameNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} catch (CommunicatorConnectorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-	}
-
-	public void init() throws CommunicatorConnectorException, IOException {
-		cloudMessaging = GoogleCloudMessaging
-				.getInstance(getApplicationContext());
-		
-
-		
+		cloudMessaging = GoogleCloudMessaging.getInstance(context);
 
 		checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
-		Map<String, Object> mapKey = mConnector.requestAppConfigurationToPush(
-				PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
-		//set senderid
+		Map<String, Object> mapKey = null;
+		
+		
+		//solo per test
+		AppSignature signature = new AppSignature();
+		signature.setApiKey("AIzaSyCW1Vr4LKs22qrFWBwXX0DC_ckEB20YgEY");
+		signature.setAppId(APP_ID);
+		signature.setSenderId("499940284623");
+		mConnector.registerApp(signature,
+				APP_ID, PushServiceCostant.CLIENT_AUTH_TOKEN);
+		
+		//solo per test
+		
+		try {
+			mapKey = mConnector.requestAppConfigurationToPush(
+					PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		// set senderid
 		PushServiceCostant.setConfigurationMap(mapKey);
-	
 
-		registerReceiver(mHandleMessageReceiver, new IntentFilter(
+		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
 
 		new AsyncTask<Void, Void, Void>() {
@@ -90,11 +93,13 @@ public class PushServiceActivity extends Activity {
 				try {
 					regId = cloudMessaging
 							.register(PushServiceCostant.SENDER_ID);
-					if (regId!=null){
-						UserSignature signUserSignature=new UserSignature();
+					if (regId != null) {
+						UserSignature signUserSignature = new UserSignature();
 						signUserSignature.setAppName(APP_ID);
 						signUserSignature.setRegistrationId(regId);
-						mConnector.registerUserToPush(APP_ID, signUserSignature, PushServiceCostant.USER_AUTH_TOKEN);
+						mConnector.registerUserToPush(APP_ID,
+								signUserSignature,
+								PushServiceCostant.USER_AUTH_TOKEN);
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -112,21 +117,19 @@ public class PushServiceActivity extends Activity {
 			}
 
 		}.execute();
-		
+
 	}
-
-
 
 	public void destroy() {
 		if (mRegisterTask != null) {
 			mRegisterTask.cancel(true);
 		}
-		unregisterReceiver(mHandleMessageReceiver);
+		context.unregisterReceiver(mHandleMessageReceiver);
 	}
 
 	private void checkNotNull(Object reference, String name) {
 		if (reference == null) {
-			throw new NullPointerException(getApplicationContext().getString(
+			throw new NullPointerException(context.getString(
 					R.string.error_config, name));
 		}
 	}
