@@ -37,8 +37,11 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <meta-data
-                android:name="SENDER_ID"
-                android:value="200219070178" />
+                android:name="USER_AUTH_TOKEN"
+                android:value="{token sul portale smartcampus}" />
+ 	    <meta-data
+                android:name="CLIENT_AUTH_TOKEN"
+                android:value="{token sul portale smartcampus}" />
             <meta-data
                 android:name="SERVER_URL"
                 android:value="https://vas-dev.smartcampuslab.it/core.communicator" />

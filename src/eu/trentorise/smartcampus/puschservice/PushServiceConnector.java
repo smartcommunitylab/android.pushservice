@@ -2,7 +2,6 @@ package eu.trentorise.smartcampus.puschservice;
 
 import java.util.Map;
 
-import junit.framework.Assert;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,8 +47,14 @@ public class PushServiceConnector {
 			ai = context.getPackageManager().getApplicationInfo(
 					context.getPackageName(), PackageManager.GET_META_DATA);
 			Bundle bundle = ai.metaData;
-			APP_ID = "clientname";//bundle.getString("APP_ID");
-			SERVER_URL = "https://vas-dev.smartcampuslab.it/core.communicator";//bundle.getString("SERVER_URL");
+			APP_ID = bundle.getString("APP_ID");
+			SERVER_URL = bundle.getString("SERVER_URL");
+			PushServiceCostant.setSERVER_URL(SERVER_URL);
+			
+			//first version
+			PushServiceCostant.setUSER_AUTH_TOKEN(bundle.getString("USER_AUTH_TOKEN"));
+			PushServiceCostant.setCLIENT_AUTH_TOKEN(bundle.getString("CLIENT_AUTH_TOKEN"));
+			
 			try {
 				mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
 			} catch (Exception e) {
@@ -66,7 +71,7 @@ public class PushServiceConnector {
 		}
 		cloudMessaging = GoogleCloudMessaging.getInstance(context);
 
-		checkNotNull(PushServiceCostant.SERVER_URL, "SERVER_URL");
+		checkNotNull(PushServiceCostant.getSERVER_URL(), "SERVER_URL");
 		
 		
 		
@@ -90,13 +95,13 @@ public class PushServiceConnector {
 					signature.setAppId(APP_ID);
 					signature.setSenderId("499940284623");
 					mConnector.registerApp(signature,
-							APP_ID, PushServiceCostant.CLIENT_AUTH_TOKEN);
+							APP_ID, PushServiceCostant.getCLIENT_AUTH_TOKEN());
 					
 					//solo per test
 					
 					try {
 						mapKey = mConnector.requestAppConfigurationToPush(
-								PushServiceCostant.CLIENT_AUTH_TOKEN, APP_ID);
+								PushServiceCostant.getCLIENT_AUTH_TOKEN(), APP_ID);
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -113,7 +118,7 @@ public class PushServiceConnector {
 						signUserSignature.setRegistrationId(regId);
 						mConnector.registerUserToPush(APP_ID,
 								signUserSignature,
-								PushServiceCostant.USER_AUTH_TOKEN);
+								PushServiceCostant.getUSER_AUTH_TOKEN());
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
