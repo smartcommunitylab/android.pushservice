@@ -26,9 +26,9 @@ import eu.trentorise.smartcampus.pushservice.R;
 /**
  * Main UI for the demo app.
  */
-public class PushServiceActivity {
+public class PushServiceConnector {
 
-	private static final String TAG = "PushServiceActivity";
+	private static final String TAG = "PushServiceConnector";
 
 	AsyncTask<Void, Void, Void> mRegisterTask;
 
