@@ -19,13 +19,13 @@
     <uses-permission android:name="eu.trentorise.smartcampus.pushservice.permission.C2D_MESSAGE" />
   <meta-data
                 android:name="SENDER_ID"
-                android:value="200219070178" />
+                android:value="499940284623" />
             <meta-data
                 android:name="SERVER_URL"
                 android:value="https://vas-dev.smartcampuslab.it/core.communicator" />
             <meta-data
                 android:name="APP_ID"
-                android:value="Risolutore" />
+                android:value="studymate" />
     
     <application
         android:allowBackup="true"
@@ -38,16 +38,16 @@
             android:screenOrientation="portrait" >
             <meta-data
                 android:name="USER_AUTH_TOKEN"
-                android:value="{token sul portale smartcampus}" />
+                android:value="b8fcb94d-b4cf-438f-802a-c0a560734c88" />
  	    <meta-data
                 android:name="CLIENT_AUTH_TOKEN"
-                android:value="{token sul portale smartcampus}" />
+                android:value="" />
             <meta-data
                 android:name="SERVER_URL"
                 android:value="https://vas-dev.smartcampuslab.it/core.communicator" />
             <meta-data
                 android:name="APP_ID"
-                android:value="Risolutore" />
+                android:value="studymate" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

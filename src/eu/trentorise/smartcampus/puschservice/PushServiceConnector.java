@@ -17,7 +17,6 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
-import eu.trentorise.smartcampus.communicator.model.AppSignature;
 import eu.trentorise.smartcampus.communicator.model.UserSignature;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
@@ -36,12 +35,15 @@ public class PushServiceConnector {
 	private GoogleCloudMessaging cloudMessaging;
 	private CommunicatorConnector mConnector;
 	private Context context;
+	private String userAuthToken;
 
 	private static String APP_ID;
 	private static String SERVER_URL;
 
-	public void init(Context cnt) throws CommunicatorConnectorException {
+	public void init(Context cnt, String tkn)
+			throws CommunicatorConnectorException {
 		context = cnt;
+		userAuthToken = tkn;
 		ApplicationInfo ai;
 		try {
 			ai = context.getPackageManager().getApplicationInfo(
@@ -50,11 +52,7 @@ public class PushServiceConnector {
 			APP_ID = bundle.getString("APP_ID");
 			SERVER_URL = bundle.getString("SERVER_URL");
 			PushServiceCostant.setSERVER_URL(SERVER_URL);
-			
-			//first version
-			PushServiceCostant.setUSER_AUTH_TOKEN(bundle.getString("USER_AUTH_TOKEN"));
-			PushServiceCostant.setCLIENT_AUTH_TOKEN(bundle.getString("CLIENT_AUTH_TOKEN"));
-			
+
 			try {
 				mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
 			} catch (Exception e) {
@@ -72,11 +70,6 @@ public class PushServiceConnector {
 		cloudMessaging = GoogleCloudMessaging.getInstance(context);
 
 		checkNotNull(PushServiceCostant.getSERVER_URL(), "SERVER_URL");
-		
-		
-		
-	
-		
 
 		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
@@ -87,29 +80,36 @@ public class PushServiceConnector {
 			protected Void doInBackground(Void... params) {
 				// TODO Auto-generated method stub
 				try {
-					
+					// // // solo per test
+					// AppSignature signature = new AppSignature();
+					// Map<String, Object> publiclist = new HashMap<String,
+					// Object>();
+					// publiclist.put(Constants.GCM_SENDER_ID, "557126495282");
+					// Map<String, Object> privatelist = new HashMap<String,
+					// Object>();
+					// privatelist.put(Constants.GCM_SENDER_API_KEY,
+					// "AIzaSyBA0dQYoF2YQKwm6h5dH4q7h5DTt7LmJrw");
+					// signature.setPrivateKey(privatelist);
+					// signature.setPublicKey(publiclist);
+					//
+					//
+					// mConnector.registerApp(signature, APP_ID,
+					// "043b44c9-7277-4888-8b81-890a9607c678");
+					//
+					// // // solo per test
+
+					System.out
+							.println("Token in pushservice: " + userAuthToken);
+					System.out.println(APP_ID);
+
 					Map<String, Object> mapKey = null;
-					//solo per test
-					AppSignature signature = new AppSignature();
-					signature.setApiKey("AIzaSyCW1Vr4LKs22qrFWBwXX0DC_ckEB20YgEY");
-					signature.setAppId(APP_ID);
-					signature.setSenderId("499940284623");
-					mConnector.registerApp(signature,
-							APP_ID, PushServiceCostant.getCLIENT_AUTH_TOKEN());
-					
-					//solo per test
-					
-					try {
-						mapKey = mConnector.requestAppConfigurationToPush(
-								PushServiceCostant.getCLIENT_AUTH_TOKEN(), APP_ID);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
+
+					mapKey = mConnector.requestPublicConfigurationToPush(
+							APP_ID, userAuthToken);
+					System.out.println(mapKey);
 					// set senderid
-					//PushServiceCostant.setConfigurationMap(mapKey);
-					
+					PushServiceCostant.setConfigurationMap(mapKey);
+
 					regId = cloudMessaging
 							.register(PushServiceCostant.SENDER_ID);
 					if (regId != null) {
@@ -117,8 +117,7 @@ public class PushServiceConnector {
 						signUserSignature.setAppName(APP_ID);
 						signUserSignature.setRegistrationId(regId);
 						mConnector.registerUserToPush(APP_ID,
-								signUserSignature,
-								PushServiceCostant.getUSER_AUTH_TOKEN());
+								signUserSignature, userAuthToken);
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
