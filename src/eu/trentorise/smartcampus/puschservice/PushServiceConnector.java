@@ -1,5 +1,7 @@
 package eu.trentorise.smartcampus.puschservice;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import android.content.BroadcastReceiver;
@@ -17,7 +19,10 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
+import eu.trentorise.smartcampus.communicator.model.Notification;
+import eu.trentorise.smartcampus.communicator.model.NotificationAuthor;
 import eu.trentorise.smartcampus.communicator.model.UserSignature;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 import eu.trentorise.smartcampus.puschservice.util.PushServiceCostant;
 import eu.trentorise.smartcampus.pushservice.R;
 
@@ -36,14 +41,15 @@ public class PushServiceConnector {
 	private CommunicatorConnector mConnector;
 	private Context context;
 	private String userAuthToken;
-
+	private BasicProfile bp;
 	private static String APP_ID;
 	private static String SERVER_URL;
 
-	public void init(Context cnt, String tkn)
+	public void init(Context cnt, String tkn, BasicProfile basicP)
 			throws CommunicatorConnectorException {
 		context = cnt;
 		userAuthToken = tkn;
+		bp = basicP;
 		ApplicationInfo ai;
 		try {
 			ai = context.getPackageManager().getApplicationInfo(
@@ -118,6 +124,27 @@ public class PushServiceConnector {
 						signUserSignature.setRegistrationId(regId);
 						mConnector.registerUserToPush(APP_ID,
 								signUserSignature, userAuthToken);
+
+						// send notification
+						List<String> users = new ArrayList<String>();
+						users.add(bp.getUserId());
+
+						
+						Notification n = new Notification();
+						n.setId(null);
+						n.setUser(bp.getName());
+						n.setTitle("Titolo prima notifica");
+						n.setDescription("Testo prima notifica");
+						n.setType(APP_ID);
+						
+						NotificationAuthor author = new NotificationAuthor();
+						author.setUserId(bp.getUserId());
+						
+						n.setAuthor(author);
+						mConnector.sendUserNotification(users, n, userAuthToken);
+
+						//mConnector.sendAppNotification(n, "55712645282", users,
+//								userAuthToken);
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
