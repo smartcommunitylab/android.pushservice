@@ -17,9 +17,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="eu.trentorise.smartcampus.pushservice.permission.C2D_MESSAGE" />
-  <meta-data
-                android:name="SENDER_ID"
-                android:value="499940284623" />
+ 
             <meta-data
                 android:name="SERVER_URL"
                 android:value="https://vas-dev.smartcampuslab.it/core.communicator" />
