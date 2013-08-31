@@ -1,4 +1,4 @@
-package eu.trentorise.smartcampus.puschservice;
+package eu.trentorise.smartcampus.pushservice;
 
 import java.util.Map;
 
@@ -6,11 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -38,17 +34,14 @@ public class PushServiceConnector {
 	private static String SERVER_URL;
 	private static String senderid;
 
-	public void init(Context cnt, String tkn)
+	public void init(Context cnt, String tkn,String appid,String ServerUrl)
 			throws CommunicatorConnectorException {
 		context = cnt;
 		userAuthToken = tkn;
-		ApplicationInfo ai;
-		try {
-			ai = context.getPackageManager().getApplicationInfo(
-					context.getPackageName(), PackageManager.GET_META_DATA);
-			Bundle bundle = ai.metaData;
-			APP_ID = bundle.getString("APP_ID");
-			SERVER_URL = bundle.getString("SERVER_URL");
+	
+				
+			APP_ID = appid;
+			SERVER_URL = ServerUrl;
 
 			try {
 				mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
@@ -56,11 +49,7 @@ public class PushServiceConnector {
 				e.printStackTrace();
 			}
 
-		} catch (NameNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 		cloudMessaging = GoogleCloudMessaging.getInstance(context);
 
 		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
@@ -98,8 +87,8 @@ public class PushServiceConnector {
 						UserSignature signUserSignature = new UserSignature();
 						signUserSignature.setAppName(APP_ID);
 						signUserSignature.setRegistrationId(regId);
-						mConnector.registerUserToPush(APP_ID,
-								signUserSignature, userAuthToken);
+						mConnector.registerUserToPush(
+								signUserSignature,APP_ID, userAuthToken);
 
 					}
 
