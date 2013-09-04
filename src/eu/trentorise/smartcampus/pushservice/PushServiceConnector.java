@@ -14,6 +14,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.UserSignature;
+import eu.trentorise.smartcampus.profileservice.model.BasicProfile;
 
 
 
@@ -33,11 +34,13 @@ public class PushServiceConnector {
 	private static String APP_ID;
 	private static String SERVER_URL;
 	private static String senderid;
+	private BasicProfile bp;
 
-	public void init(Context cnt, String tkn,String appid,String ServerUrl)
+	public void init(Context cnt, String tkn,String appid,String ServerUrl, BasicProfile basicP)
 			throws CommunicatorConnectorException {
 		context = cnt;
 		userAuthToken = tkn;
+		basicP = bp;
 	
 				
 			APP_ID = appid;
