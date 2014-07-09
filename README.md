@@ -29,7 +29,7 @@ Add the permissions to the manifest:
         android:name="eu.trentorise.smartcampus.viaggiatrento.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="eu.trentorise.smartcampus.viaggiatrento.permission.C2D_MESSAGE" />
+    <uses-permission android:name="YOURPACKAGE.C2D_MESSAGE" />
     
     <!-- receives GCM messages -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
