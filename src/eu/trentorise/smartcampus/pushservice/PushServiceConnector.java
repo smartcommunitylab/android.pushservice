@@ -6,123 +6,89 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gcm.GCMRegistrar;
 
 import eu.trentorise.smartcampus.communicator.CommunicatorConnector;
 import eu.trentorise.smartcampus.communicator.CommunicatorConnectorException;
 import eu.trentorise.smartcampus.communicator.model.UserSignature;
-
-
 
 public class PushServiceConnector {
 	public static final Object SENDER_ID_KEY = "GCM_SENDER_ID";
 	public static final Object APP_ID_KEY = "APP_ID";
 	private static final String TAG = "PushServiceConnector";
 
-	AsyncTask<Void, Void, Void> mRegisterTask;
+	private Context mContext;
+	private String mUserAuthToken;;
+	private static String mAppId;
+	private static String mServerUrl;
 
-	private String regId;
-
-	private GoogleCloudMessaging cloudMessaging;
-	private CommunicatorConnector mConnector;
-	private Context context;
-	private String userAuthToken;;
-	private static String APP_ID;
-	private static String SERVER_URL;
-	private static String senderid;
-
-	public void init(Context cnt, String tkn,String appid,String ServerUrl)
+	public void init(Context cnt, String tkn, String appid, String ServerUrl)
 			throws CommunicatorConnectorException {
-		context = cnt;
-		userAuthToken = tkn;
-	
-				
-			APP_ID = appid;
-			SERVER_URL = ServerUrl;
+		mContext = cnt;
+		mUserAuthToken = tkn;
 
-			try {
-				mConnector = new CommunicatorConnector(SERVER_URL, APP_ID);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		mAppId = appid;
+		mServerUrl = ServerUrl;
 
-		
-		cloudMessaging = GoogleCloudMessaging.getInstance(context);
+		CommunicatorConnector mConnector = null;
+		try {
+			mConnector = new CommunicatorConnector(mServerUrl, mAppId);
+			IntentFilter gcmFilter = new IntentFilter();
+			gcmFilter.addAction("GCM_RECEIVED_ACTION");
 
-		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
-				DISPLAY_MESSAGE_ACTION));
+			String regId = "";
+			// This registerClient() method checks the current device,
+			// checks the
+			// manifest for the appropriate rights, and then retrieves a
+			// registration id
+			// from the GCM cloud. If there is no registration id,
+			// GCMRegistrar will
+			// register this device for the specified project, which will
+			// return a
+			// registration id.
+			// Check that the device supports GCM (should be in a try /
+			// catch)
+			GCMRegistrar.checkDevice(mContext);
 
-		new AsyncTask<Void, Void, Void>() {
+			// Check the manifest to be sure this app has all the
+			// required
+			// permissions.
+			GCMRegistrar.checkManifest(mContext);
 
-			@Override
-			protected Void doInBackground(Void... params) {
-				// TODO Auto-generated method stub
-				try {
+			// Get the existing registration id, if it exists.
+			regId = GCMRegistrar.getRegistrationId(mContext);
 
-					System.out
-							.println("Token in pushservice: " + userAuthToken);
-
-					Map<String, Object> mapKey = null;
-
-					// get parameters from communicator service
-					mapKey = mConnector.requestPublicConfigurationToPush(
-							APP_ID, userAuthToken);
+			if (regId.equals("")) {
+				if (mConnector != null) {
+					Map<String, Object> mapKey = mConnector
+							.requestPublicConfigurationToPush("core.mobility",
+									mUserAuthToken);
 
 					// find senderid
-					senderid = String.valueOf(mapKey
-							.get(SENDER_ID_KEY));
-
-					if (senderid == null)
-						throw new CommunicatorConnectorException(
-								"No app registered with this app id");
-
-					// register app to gcm
-					regId = cloudMessaging.register(senderid);
-
-					// check regid not null
-					if (regId != null) {
+					String senderid = String.valueOf(mapKey
+							.get("GCM_SENDER_ID"));
+					// register this device for this project
+					GCMRegistrar.register(mContext, senderid);
+					regId = GCMRegistrar.getRegistrationId(mContext);
+					if (regId != null && regId.length() > 0) {
 						UserSignature signUserSignature = new UserSignature();
-						signUserSignature.setAppName(APP_ID);
+						signUserSignature.setAppName("core.mobility");
 						signUserSignature.setRegistrationId(regId);
-						mConnector.registerUserToPush(
-								signUserSignature,APP_ID, userAuthToken);
-
+						mConnector.registerUserToPush(signUserSignature,
+								"core.mobility", mUserAuthToken);
 					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-				return null;
+			} else {
+				// Already registered;
 			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				super.onPostExecute(result);
-				Log.v(TAG, "\n RegId:" + regId + "\n\n ProjectId:" + senderid
-						+ "\n\n");
-			}
-
-		}.execute();
+			
+			Log.i("GCM_REGID:", regId);
+		} catch (Exception e) {
+			Log.e(TAG, e.toString());
+		}
 
 	}
-
-	public void destroy() {
-		if (mRegisterTask != null) {
-			mRegisterTask.cancel(true);
-		}
-		context.unregisterReceiver(mHandleMessageReceiver);
-	}
-
-	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.i("Notification", "Arrived");
-		}
-	};
-
-	static final String DISPLAY_MESSAGE_ACTION = "com.google.android.gcm.demo.app.DISPLAY_MESSAGE";
 
 }
