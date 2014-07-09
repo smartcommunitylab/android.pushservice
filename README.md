@@ -2,7 +2,7 @@ In order to use this library:
 
 Retrieve di User Auth token and then:
 
-new AsyncTask<Void, Void, Void>() {
+	new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
@@ -19,12 +19,13 @@ new AsyncTask<Void, Void, Void>() {
 				return null;
 			}
 
-		}.execute();
+	}.execute();
 
 where the APP_ID is the one registered on the smartcampus console.
 
 Add the permissions to the manifest:
- <permission
+
+	<permission
         android:name="eu.trentorise.smartcampus.viaggiatrento.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
@@ -47,7 +48,8 @@ Add the permissions to the manifest:
 
 Declare the service:
 
-<receiver android:name="com.google.android.gcm.GCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND" >
+	<receiver android:name="com.google.android.gcm.GCMBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND" >\
+
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
