@@ -140,7 +140,7 @@ public class NotificationCenter {
 		db.close();
 	}
 	
-	public void setNotificationRead(PushNotification notif) {
+	public void markNotificationAsRead(PushNotification notif) {
 		SQLiteDatabase db = mDB.getWritableDatabase();
 		try {
 			db.beginTransaction();
@@ -157,9 +157,11 @@ public class NotificationCenter {
 		db.close();
 	}
 	
-	public void setAllNotificationsRead() {
+	public void markAllNotificationAsRead() {
 		SQLiteDatabase db = mDB.getWritableDatabase();
-		db.execSQL("update from "+NotificationDBHelper.DB_TABLE_NOTIFICATION+" set "+NotificationDBHelper.READ_KEY+"=0 where true");
+		//little hack
+		db.execSQL("update "+NotificationDBHelper.DB_TABLE_NOTIFICATION+
+				" set "+NotificationDBHelper.READ_KEY+"=1 where "+NotificationDBHelper.READ_KEY+"=0");
 		db.close();
 	}
 
