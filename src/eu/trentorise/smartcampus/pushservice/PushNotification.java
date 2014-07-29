@@ -6,6 +6,7 @@ import android.content.ContentValues;
 
 public class PushNotification {
 	private Integer mId;
+
 	private String mText;
 	private Date mDate;
 	private boolean mRead = false;
@@ -23,6 +24,12 @@ public class PushNotification {
 		this.mDate = date;
 		this.mRead = read;
 	}
+	public Integer getId() {
+		return mId;
+	}
+	public void setId(Integer id) {
+		mId = id;
+	}
 	
 	/**
 	 * @return the mText
@@ -39,7 +46,7 @@ public class PushNotification {
 		return mText;
 	}
 	public String getDescription() {
-		return mText;
+		return mDate.toString();
 	}
 	/**
 	 * @param mText the mText to set
