@@ -13,16 +13,15 @@ public class GCMIntentService extends GCMBaseIntentService {
     
 	private static final String TAG = "GCMIntentService";
 	
-	public GCMIntentService(String senderID)
+	public GCMIntentService()
 	{
-		super(senderID);
+		super("220741898329");
 		Log.d(TAG, "GCMIntentService init");
 	}
 	
 
 	@Override
 	protected void onError(Context ctx, String sError) {
-		// TODO Auto-generated method stub
 		Log.d(TAG, "Error: " + sError);
 		
 	}
@@ -43,11 +42,12 @@ public class GCMIntentService extends GCMBaseIntentService {
 		
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setAction("GCM_RECEIVED_ACTION");
-		
 		broadcastIntent.putExtra("gcm", message);
 		
-		ctx.sendBroadcast(broadcastIntent);
+		NotificationDBHelper db = new NotificationDBHelper(ctx);
+		db.insertNotification(message);
 		
+		ctx.sendBroadcast(broadcastIntent);
 	}
 	
 	
@@ -55,7 +55,6 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onRegistered(Context ctx, String regId) {
 		// send regId to your server
 		
-	
 	}
 
 	@Override

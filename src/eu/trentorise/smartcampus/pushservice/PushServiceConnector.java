@@ -26,7 +26,7 @@ public class PushServiceConnector {
 
 	public void init(Context cnt, String tkn, String appid, String ServerUrl)
 			throws CommunicatorConnectorException {
-		mContext = cnt;
+		mContext = cnt.getApplicationContext();
 		mUserAuthToken = tkn;
 
 		mAppId = appid;
@@ -35,8 +35,6 @@ public class PushServiceConnector {
 		CommunicatorConnector mConnector = null;
 		try {
 			mConnector = new CommunicatorConnector(mServerUrl, mAppId);
-			IntentFilter gcmFilter = new IntentFilter();
-			gcmFilter.addAction("GCM_RECEIVED_ACTION");
 
 			String regId = "";
 			// This registerClient() method checks the current device,
@@ -70,6 +68,7 @@ public class PushServiceConnector {
 					String senderid = String.valueOf(mapKey
 							.get("GCM_SENDER_ID"));
 					// register this device for this project
+					senderid= "220741898329";
 					GCMRegistrar.register(mContext, senderid);
 					regId = GCMRegistrar.getRegistrationId(mContext);
 					if (regId != null && regId.length() > 0) {
