@@ -68,7 +68,7 @@ public class PushServiceConnector {
 					String senderid = String.valueOf(mapKey
 							.get("GCM_SENDER_ID"));
 					// register this device for this project
-					senderid= "220741898329";
+//					senderid= "220741898329";
 					GCMRegistrar.register(mContext, senderid);
 					regId = GCMRegistrar.getRegistrationId(mContext);
 					if (regId != null && regId.length() > 0) {
