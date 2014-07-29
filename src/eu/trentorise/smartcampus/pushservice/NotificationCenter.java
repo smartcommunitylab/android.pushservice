@@ -6,11 +6,13 @@ import java.util.List;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 public class NotificationCenter {
@@ -56,10 +58,10 @@ public class NotificationCenter {
 		return notifs;
 	}
 
-	public void publishNotification(Intent i,int pushId) {
+	public void publishNotification(Intent i, int pushId, Class resultActivity) {
 		String message = i.getStringExtra("message");
 		insertNotification(message);
-		showNotification(pushId, message);
+		showNotification(pushId, message, resultActivity);
 	}
 
 	public void insertNotification(PushNotification notif) {
@@ -107,6 +109,7 @@ public class NotificationCenter {
 		}
 		db.close();
 	}
+
 	public void deleteNotification(PushNotification notif) {
 		SQLiteDatabase db = mDB.getWritableDatabase();
 		try {
@@ -139,7 +142,7 @@ public class NotificationCenter {
 		}
 		db.close();
 	}
-	
+
 	public void markNotificationAsRead(PushNotification notif) {
 		SQLiteDatabase db = mDB.getWritableDatabase();
 		try {
@@ -156,22 +159,33 @@ public class NotificationCenter {
 		}
 		db.close();
 	}
-	
+
 	public void markAllNotificationAsRead() {
 		SQLiteDatabase db = mDB.getWritableDatabase();
-		//little hack
-		db.execSQL("update "+NotificationDBHelper.DB_TABLE_NOTIFICATION+
-				" set "+NotificationDBHelper.READ_KEY+"=1 where "+NotificationDBHelper.READ_KEY+"=0");
+		// little hack
+		db.execSQL("update " + NotificationDBHelper.DB_TABLE_NOTIFICATION
+				+ " set " + NotificationDBHelper.READ_KEY + "=1 where "
+				+ NotificationDBHelper.READ_KEY + "=0");
 		db.close();
 	}
 
-	public void showNotification(int pushId, String msg) {
+	public void showNotification(int pushId, String msg, Class resultActivity) {
 		NotificationCompat.Builder ncb = new NotificationCompat.Builder(
 				mContext);
 		ncb.setContentText(msg);
+		ncb.setSmallIcon(R.drawable.ic_launcher);
+		ncb.setContentTitle("title");
+		Intent resultIntent = new Intent(mContext, resultActivity);
+
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+		stackBuilder.addParentStack(resultActivity);
+		stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		ncb.setContentIntent(resultPendingIntent);
+		ncb.setAutoCancel(true);
 		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.notify(pushId, ncb.build());
-
 	}
 }
