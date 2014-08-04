@@ -34,6 +34,7 @@ public class NotificationDBHelper extends SQLiteOpenHelper {
 	static final String ROUTEID_KEY = "routeid";
 	static final String ROUTESHORTNAME_KEY = "routename";
 	static final String TRIPID_KEY = "tripid";
+	static final String FROMTIME_KEY = "from";
 	static final String DELAY_KEY = "delay";
 	static final String STATION_KEY = "station";
 
@@ -63,6 +64,8 @@ public class NotificationDBHelper extends SQLiteOpenHelper {
 			+ ROUTESHORTNAME_KEY
 			+ " text not null, "
 			+ DELAY_KEY
+			+ " text not null, "
+			+ FROMTIME_KEY
 			+ " text not null, "
 			+ TRIPID_KEY
 			+ " text not null, "

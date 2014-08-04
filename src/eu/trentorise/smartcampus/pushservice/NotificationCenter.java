@@ -29,7 +29,8 @@ public class NotificationCenter {
 	private final static String FIELD_ROUTEID = "content.routeId";
 	private final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
 	private final static String FIELD_TRIPID = "content.tripId";
-	private final static String FIELD_DElAY = "content.delay";
+	private final static String FIELD_DELAY = "content.delay";
+	private final static String OPTIONAL_FIELD_FROMTIME = "content.from";
 	private final static String OPTIONAL_FIELD_STATION = "content.station";
 
 	private NotificationDBHelper mDB;
@@ -76,6 +77,8 @@ public class NotificationCenter {
 								.getColumnIndex(NotificationDBHelper.TRIPID_KEY)),
 						Integer.parseInt(cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.DELAY_KEY))),
+						Integer.parseInt(cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.FROMTIME_KEY))),
 						cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.STATION_KEY)),
 						new Date(cursor.getLong(cursor
@@ -198,17 +201,20 @@ public class NotificationCenter {
 
 	private PushNotification buildPushNotification(Intent i) {
 		String station = null;
+		Integer from = null;
 		if (i.hasExtra(OPTIONAL_FIELD_STATION))
 			station = i.getStringExtra(OPTIONAL_FIELD_STATION);
+		if (i.hasExtra(OPTIONAL_FIELD_FROMTIME))
+			from = Integer.parseInt(i.getStringExtra(OPTIONAL_FIELD_FROMTIME));
 
 		return new PushNotification(i.getStringExtra(FIELD_TITLE),
 				i.getStringExtra(FIELD_DESCRIPTION),
 				i.getStringExtra(FIELD_AGENCYID),
 				i.getStringExtra(FIELD_ROUTEID),
 				i.getStringExtra(FIELD_ROUTESHORTNAME),
-				i.getStringExtra(FIELD_TRIPID), 
-				Integer.parseInt(i.getStringExtra(FIELD_DElAY)),
-				station, null, false);
+				i.getStringExtra(FIELD_TRIPID), Integer.parseInt(i
+						.getStringExtra(FIELD_DELAY)), from, station, null,
+				false);
 	}
 
 	public void showSystemNotification(int pushId, PushNotification notif,
@@ -216,15 +222,17 @@ public class NotificationCenter {
 		NotificationCompat.Builder ncb = new NotificationCompat.Builder(
 				mContext);
 		ncb.setSmallIcon(R.drawable.ic_launcher);
-		int unread = getUnreadNotificationCount(); 
-		if ( unread > 1) {
-			ncb.setContentText(mContext.getResources().getString(R.string.push_notification_msg));			
-			ncb.setContentTitle(mContext.getResources().getString(R.string.push_notification_msg));
-			ncb.setContentInfo(unread+"");
+		int unread = getUnreadNotificationCount();
+		if (unread > 1) {
+			ncb.setContentText(mContext.getResources().getString(
+					R.string.push_notification_msg));
+			ncb.setContentTitle(mContext.getResources().getString(
+					R.string.push_notification_msg));
+			ncb.setContentInfo(unread + "");
 		} else {
-			ncb.setContentText(notif.getDescription());			
+			ncb.setContentText(notif.getDescription());
 			ncb.setContentTitle(notif.getTitle());
-			ncb.setContentInfo(notif.getDelay()+"");
+			ncb.setContentInfo(notif.getDelay() + "");
 		}
 
 		Intent resultIntent = new Intent(mContext, resultActivity);
