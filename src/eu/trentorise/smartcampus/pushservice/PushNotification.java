@@ -13,14 +13,14 @@ public class PushNotification {
 	private String mRouteId;
 	private String mRouteShortName;
 	private String mTripId;
-	private String mDelay;
+	private Integer mDelay;
 	private String mStation;
 	private Date mDate;
 	private boolean mRead = false;
 	
 	
 	public PushNotification(String title, String description, String agencyId,
-			String routeId, String routeShortName, String tripId, String delay,
+			String routeId, String routeShortName, String tripId, Integer delay,
 			String station, Date date, boolean read) {
 		super();
 		mTitle = title;
@@ -38,7 +38,7 @@ public class PushNotification {
 
 	public PushNotification(Integer id, String title, String description,
 			String agencyId, String routeId, String routeShortName,
-			String tripId, String delay, String station, Date date, boolean read) {
+			String tripId, Integer delay, String station, Date date, boolean read) {
 		super();
 		mId = id;
 		mTitle = title;
@@ -124,12 +124,12 @@ public class PushNotification {
 	}
 
 
-	public String getDelay() {
+	public Integer getDelay() {
 		return mDelay;
 	}
 
 
-	public void setDelay(String delay) {
+	public void setDelay(Integer delay) {
 		mDelay = delay;
 	}
 

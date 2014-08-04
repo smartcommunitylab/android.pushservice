@@ -74,8 +74,8 @@ public class NotificationCenter {
 								.getColumnIndex(NotificationDBHelper.ROUTESHORTNAME_KEY)),
 						cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.TRIPID_KEY)),
-						cursor.getString(cursor
-								.getColumnIndex(NotificationDBHelper.DELAY_KEY)),
+						Integer.parseInt(cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.DELAY_KEY))),
 						cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.STATION_KEY)),
 						new Date(cursor.getLong(cursor
@@ -206,7 +206,8 @@ public class NotificationCenter {
 				i.getStringExtra(FIELD_AGENCYID),
 				i.getStringExtra(FIELD_ROUTEID),
 				i.getStringExtra(FIELD_ROUTESHORTNAME),
-				i.getStringExtra(FIELD_TRIPID), i.getStringExtra(FIELD_DElAY),
+				i.getStringExtra(FIELD_TRIPID), 
+				Integer.parseInt(i.getStringExtra(FIELD_DElAY)),
 				station, null, false);
 	}
 
@@ -223,7 +224,7 @@ public class NotificationCenter {
 		} else {
 			ncb.setContentText(notif.getDescription());			
 			ncb.setContentTitle(notif.getTitle());
-			ncb.setContentInfo(notif.getDelay());
+			ncb.setContentInfo(notif.getDelay()+"");
 		}
 
 		Intent resultIntent = new Intent(mContext, resultActivity);
