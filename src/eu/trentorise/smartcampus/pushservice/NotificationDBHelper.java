@@ -23,17 +23,25 @@ public class NotificationDBHelper extends SQLiteOpenHelper {
 
 	static final int DB_VERSION = 1;
 
-	static String DB_TABLE_NOTIFICATION = "tb_notification";
+	static final  String DB_TABLE_NOTIFICATION = "tb_notification";
 
-	static String ID_KEY = "not_id";
+	static final String ID_KEY = "not_id";
 
-	static String TEXT_KEY = "text";
+	static final String TITLE_KEY = "title";
+	static final String DESCRIPTION_KEY = "text";
+	static final String DATE_KEY = "date";
+	static final String AGENCYID_KEY = "agencyid";
+	static final String ROUTEID_KEY = "routeid";
+	static final String ROUTESHORTNAME_KEY = "routename";
+	static final String TRIPID_KEY = "tripid";
+	static final String DELAY_KEY = "delay";
+	static final String STATION_KEY = "station";
 
 	// 0 for read
 	// 1 for unread
-	static String READ_KEY = "read";
+	static final String READ_KEY = "read";
 
-	static String DATE_KEY = "date";
+	
 
 	public NotificationDBHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -44,8 +52,22 @@ public class NotificationDBHelper extends SQLiteOpenHelper {
 			+ " ("
 			+ ID_KEY
 			+ " integer PRIMARY_KEY, "
-			+ TEXT_KEY
+			+ TITLE_KEY
 			+ " text not null, "
+			+ DESCRIPTION_KEY
+			+ " text not null, "
+			+ AGENCYID_KEY
+			+ " text not null, "
+			+ ROUTEID_KEY
+			+ " text not null, "
+			+ ROUTESHORTNAME_KEY
+			+ " text not null, "
+			+ DELAY_KEY
+			+ " text not null, "
+			+ TRIPID_KEY
+			+ " text not null, "
+			+ STATION_KEY
+			+ " text, "
 			+ READ_KEY
 			+ " integer DEFAULT 0, "
 			+ DATE_KEY + " DATE DEFAULT (datetime('now')));";

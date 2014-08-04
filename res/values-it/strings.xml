@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="push_notification_title">Hai delle notifiche non lette</string>
+    <string name="push_notification_msg">Premi qui per vederle tutte.</string>
+    
+</resources>

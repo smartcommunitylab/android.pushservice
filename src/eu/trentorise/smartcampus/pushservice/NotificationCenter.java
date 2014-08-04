@@ -4,18 +4,33 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 public class NotificationCenter {
+
+	private final static String FIELD_TITLE = "title";
+	private final static String FIELD_DESCRIPTION = "description";
+	private final static String FIELD_AGENCYID = "content.agencyId";
+	private final static String FIELD_ROUTEID = "content.routeId";
+	private final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
+	private final static String FIELD_TRIPID = "content.tripId";
+	private final static String FIELD_DElAY = "content.delay";
+	private final static String OPTIONAL_FIELD_STATION = "content.station";
 
 	private NotificationDBHelper mDB;
 	private Context mContext;
@@ -25,11 +40,18 @@ public class NotificationCenter {
 		mDB = new NotificationDBHelper(mContext);
 	}
 
+	public void publishNotification(Intent i, int pushId,
+			Class<? extends Activity> resultActivity) {
+		PushNotification notif = buildPushNotification(i);
+		insertNotification(notif);
+		showSystemNotification(pushId, notif, resultActivity);
+	}
+
 	public List<PushNotification> getNotifications() {
 		SQLiteDatabase db = mDB.getReadableDatabase();
 		String sql = " select * from "
-				+ NotificationDBHelper.DB_TABLE_NOTIFICATION
-				+ " order by date DESC";
+				+ NotificationDBHelper.DB_TABLE_NOTIFICATION + " order by "
+				+ NotificationDBHelper.DATE_KEY + " DESC";
 		ArrayList<PushNotification> notifs = new ArrayList<PushNotification>();
 		try {
 			db.beginTransaction();
@@ -41,7 +63,21 @@ public class NotificationCenter {
 						cursor.getInt(cursor
 								.getColumnIndex(NotificationDBHelper.ID_KEY)),
 						cursor.getString(cursor
-								.getColumnIndex(NotificationDBHelper.TEXT_KEY)),
+								.getColumnIndex(NotificationDBHelper.TITLE_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.DESCRIPTION_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.AGENCYID_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.ROUTEID_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.ROUTESHORTNAME_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.TRIPID_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.DELAY_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.STATION_KEY)),
 						new Date(cursor.getLong(cursor
 								.getColumnIndex(NotificationDBHelper.DATE_KEY))),
 						cursor.getInt(cursor
@@ -58,12 +94,6 @@ public class NotificationCenter {
 		return notifs;
 	}
 
-	public void publishNotification(Intent i, int pushId, Class resultActivity) {
-		String message = i.getStringExtra("message");
-		insertNotification(message);
-		showNotification(pushId, message, resultActivity);
-	}
-
 	public void insertNotification(PushNotification notif) {
 		SQLiteDatabase db = mDB.getWritableDatabase();
 		try {
@@ -77,21 +107,6 @@ public class NotificationCenter {
 			db.endTransaction();
 		}
 		db.close();
-	}
-
-	private void insertNotification(String msg) {
-		SQLiteDatabase db = mDB.getWritableDatabase();
-		PushNotification out = new PushNotification(msg);
-		try {
-			db.beginTransaction();
-			db.insert(NotificationDBHelper.DB_TABLE_NOTIFICATION, null,
-					out.toContentValues());
-			db.setTransactionSuccessful();
-		} catch (Exception ex) {
-			Log.e(this.getClass().getName(), ex.toString());
-		} finally {
-			db.endTransaction();
-		}
 	}
 
 	public void deleteNotification(int id) {
@@ -130,8 +145,9 @@ public class NotificationCenter {
 		SQLiteDatabase db = mDB.getWritableDatabase();
 		try {
 			db.beginTransaction();
-			db.update(NotificationDBHelper.DB_TABLE_NOTIFICATION,
-					new PushNotification(id).toContentValues(),
+			ContentValues cv = new ContentValues();
+			cv.put(NotificationDBHelper.ID_KEY, id + "");
+			db.update(NotificationDBHelper.DB_TABLE_NOTIFICATION, cv,
 					NotificationDBHelper.ID_KEY + "=?",
 					new String[] { id + "" });
 			db.setTransactionSuccessful();
@@ -169,12 +185,47 @@ public class NotificationCenter {
 		db.close();
 	}
 
-	public void showNotification(int pushId, String msg, Class resultActivity) {
+	public int getUnreadNotificationCount() {
+		SQLiteDatabase db = mDB.getReadableDatabase();
+		Cursor mCount = db.rawQuery("select count(*) from "
+				+ NotificationDBHelper.DB_TABLE_NOTIFICATION + " where "
+				+ NotificationDBHelper.READ_KEY + " =0", null);
+		mCount.moveToFirst();
+		int count = mCount.getInt(0);
+		mCount.close();
+		return count;
+	}
+
+	private PushNotification buildPushNotification(Intent i) {
+		String station = null;
+		if (i.hasExtra(OPTIONAL_FIELD_STATION))
+			station = i.getStringExtra(OPTIONAL_FIELD_STATION);
+
+		return new PushNotification(i.getStringExtra(FIELD_TITLE),
+				i.getStringExtra(FIELD_DESCRIPTION),
+				i.getStringExtra(FIELD_AGENCYID),
+				i.getStringExtra(FIELD_ROUTEID),
+				i.getStringExtra(FIELD_ROUTESHORTNAME),
+				i.getStringExtra(FIELD_TRIPID), i.getStringExtra(FIELD_DElAY),
+				station, null, false);
+	}
+
+	public void showSystemNotification(int pushId, PushNotification notif,
+			Class<? extends Activity> resultActivity) {
 		NotificationCompat.Builder ncb = new NotificationCompat.Builder(
 				mContext);
-		ncb.setContentText(msg);
 		ncb.setSmallIcon(R.drawable.ic_launcher);
-		ncb.setContentTitle("title");
+		int unread = getUnreadNotificationCount(); 
+		if ( unread > 1) {
+			ncb.setContentText(mContext.getResources().getString(R.string.push_notification_msg));			
+			ncb.setContentTitle(mContext.getResources().getString(R.string.push_notification_msg));
+			ncb.setContentInfo(unread+"");
+		} else {
+			ncb.setContentText(notif.getDescription());			
+			ncb.setContentTitle(notif.getTitle());
+			ncb.setContentInfo(notif.getDelay());
+		}
+
 		Intent resultIntent = new Intent(mContext, resultActivity);
 
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
@@ -186,6 +237,8 @@ public class NotificationCenter {
 		ncb.setAutoCancel(true);
 		NotificationManager nm = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(pushId, ncb.build());
+		Notification n = ncb.build();
+		n.defaults = Notification.DEFAULT_ALL;
+		nm.notify(pushId, n);
 	}
 }

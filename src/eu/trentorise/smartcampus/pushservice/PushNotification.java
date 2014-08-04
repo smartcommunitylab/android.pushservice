@@ -5,93 +5,188 @@ import java.util.Date;
 import android.content.ContentValues;
 
 public class PushNotification {
+	
 	private Integer mId;
-
-	private String mText;
+	private String mTitle;
+	private String mDescription;
+	private String mAgencyId;
+	private String mRouteId;
+	private String mRouteShortName;
+	private String mTripId;
+	private String mDelay;
+	private String mStation;
 	private Date mDate;
 	private boolean mRead = false;
 	
-	public PushNotification(String text){
-		this.mText = text;
-	}
-	public PushNotification(int id){
-		this.mId=id;
-	}
 	
-	public PushNotification(int id,String text, Date date, boolean read) {
-		this.mId=id;
-		this.mText = text;
-		this.mDate = date;
-		this.mRead = read;
+	public PushNotification(String title, String description, String agencyId,
+			String routeId, String routeShortName, String tripId, String delay,
+			String station, Date date, boolean read) {
+		super();
+		mTitle = title;
+		mDescription = description;
+		mAgencyId = agencyId;
+		mRouteId = routeId;
+		mRouteShortName = routeShortName;
+		mTripId = tripId;
+		mDelay = delay;
+		mStation = station;
+		mDate = date;
+		mRead = read;
 	}
+
+
+	public PushNotification(Integer id, String title, String description,
+			String agencyId, String routeId, String routeShortName,
+			String tripId, String delay, String station, Date date, boolean read) {
+		super();
+		mId = id;
+		mTitle = title;
+		mDescription = description;
+		mAgencyId = agencyId;
+		mRouteId = routeId;
+		mRouteShortName = routeShortName;
+		mTripId = tripId;
+		mDelay = delay;
+		mStation = station;
+		mDate = date;
+		mRead = read;
+	}
+
+
 	public Integer getId() {
 		return mId;
 	}
+
+
 	public void setId(Integer id) {
 		mId = id;
 	}
-	
-	/**
-	 * @return the mText
-	 */
-	public String getText() {
-		return mText;
-	}
-	
-	//TODO return actual data
-	public String getContent() {
-		return null;
-	}
+
+
 	public String getTitle() {
-		return mText;
+		return mTitle;
 	}
+
+
+	public void setTitle(String title) {
+		mTitle = title;
+	}
+
+
 	public String getDescription() {
-		return mDate.toString();
+		return mDescription;
 	}
-	/**
-	 * @param mText the mText to set
-	 */
-	public void setText(String mText) {
-		this.mText = mText;
+
+
+	public void setDescription(String description) {
+		mDescription = description;
 	}
-	/**
-	 * @return the mDate
-	 */
+
+
+	public String getAgencyId() {
+		return mAgencyId;
+	}
+
+
+	public void setAgencyId(String agencyId) {
+		mAgencyId = agencyId;
+	}
+
+
+	public String getRouteId() {
+		return mRouteId;
+	}
+
+
+	public void setRouteId(String routeId) {
+		mRouteId = routeId;
+	}
+
+
+	public String getRouteShortName() {
+		return mRouteShortName;
+	}
+
+
+	public void setRouteShortName(String routeShortName) {
+		mRouteShortName = routeShortName;
+	}
+
+
+	public String getTripId() {
+		return mTripId;
+	}
+
+
+	public void setTripId(String tripId) {
+		mTripId = tripId;
+	}
+
+
+	public String getDelay() {
+		return mDelay;
+	}
+
+
+	public void setDelay(String delay) {
+		mDelay = delay;
+	}
+
+
+	public String getStation() {
+		return mStation;
+	}
+
+
+	public void setStation(String station) {
+		mStation = station;
+	}
+
+
 	public Date getDate() {
 		return mDate;
 	}
-	/**
-	 * @param mDate the mDate to set
-	 */
-	public void setDate(Date mDate) {
-		this.mDate = mDate;
+
+
+	public void setDate(Date date) {
+		mDate = date;
 	}
-	/**
-	 * @return the mRead
-	 */
+
+
 	public boolean isRead() {
 		return mRead;
 	}
-	/**
-	 * @param mRead the mRead to set
-	 */
-	public void setRead(boolean mRead) {
-		this.mRead = mRead;
+
+
+	public void setRead(boolean read) {
+		mRead = read;
 	}
-	
+
+
 	public ContentValues toContentValues(){
 		ContentValues out = new ContentValues();
-		if(mText==null && mId==null)
+		
+		if(mDescription==null && mId==null)
 			throw new RuntimeException("Notification's empy");
-		if(mText!=null)
-			out.put(NotificationDBHelper.TEXT_KEY, mText);
-		out.put(NotificationDBHelper.READ_KEY, mRead?1:0);
 		if(mDate!=null)
 			out.put(NotificationDBHelper.DATE_KEY, mDate.getTime());
 		else
 			out.put(NotificationDBHelper.DATE_KEY, new Date().getTime());
 		if(mId!=null)
 			out.put(NotificationDBHelper.ID_KEY, mId);
+		if(mStation!=null)
+			out.put(NotificationDBHelper.STATION_KEY,mStation);
+		
+		out.put(NotificationDBHelper.TITLE_KEY,mTitle);
+		out.put(NotificationDBHelper.DESCRIPTION_KEY, mDescription);
+		out.put(NotificationDBHelper.READ_KEY, mRead?1:0);
+		out.put(NotificationDBHelper.AGENCYID_KEY, mAgencyId);
+		out.put(NotificationDBHelper.DELAY_KEY,mDelay);
+		out.put(NotificationDBHelper.ROUTEID_KEY,mRouteId);
+		out.put(NotificationDBHelper.ROUTESHORTNAME_KEY,mRouteShortName);
+		out.put(NotificationDBHelper.TRIPID_KEY,mTripId);
+		
 		return out;
 	}
 
