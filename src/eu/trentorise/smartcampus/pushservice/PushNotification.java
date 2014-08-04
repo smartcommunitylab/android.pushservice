@@ -119,6 +119,16 @@ public class PushNotification {
 	public void setDelay(Integer delay) {
 		mDelay = delay;
 	}
+	
+	
+
+	public Integer getFromTime() {
+		return mFromTime;
+	}
+
+	public void setFromTime(Integer fromTime) {
+		mFromTime = fromTime;
+	}
 
 	public String getStation() {
 		return mStation;
