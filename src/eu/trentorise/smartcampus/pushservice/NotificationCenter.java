@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,6 +31,7 @@ public class NotificationCenter {
 	private final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
 	private final static String FIELD_TRIPID = "content.tripId";
 	private final static String FIELD_DELAY = "content.delay";
+	private final static String FIELD_ENTITY = "entity";
 	private final static String OPTIONAL_FIELD_FROMTIME = "content.from";
 	private final static String OPTIONAL_FIELD_STATION = "content.station";
 
@@ -75,9 +77,11 @@ public class NotificationCenter {
 								.getColumnIndex(NotificationDBHelper.ROUTESHORTNAME_KEY)),
 						cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.TRIPID_KEY)),
+						cursor.getString(cursor
+								.getColumnIndex(NotificationDBHelper.JOURNEY_KEY)),
 						Integer.parseInt(cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.DELAY_KEY))),
-						Integer.parseInt(cursor.getString(cursor
+						Long.parseLong(cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.FROMTIME_KEY))),
 						cursor.getString(cursor
 								.getColumnIndex(NotificationDBHelper.STATION_KEY)),
@@ -201,20 +205,38 @@ public class NotificationCenter {
 
 	private PushNotification buildPushNotification(Intent i) {
 		String station = null;
-		Integer from = null;
+		Long from = null;
 		if (i.hasExtra(OPTIONAL_FIELD_STATION))
 			station = i.getStringExtra(OPTIONAL_FIELD_STATION);
 		if (i.hasExtra(OPTIONAL_FIELD_FROMTIME))
-			from = Integer.parseInt(i.getStringExtra(OPTIONAL_FIELD_FROMTIME));
+			from = Long.parseLong(i.getStringExtra(OPTIONAL_FIELD_FROMTIME));
+
+		// String test = "[{"type":"journey","id":"123455476346353","title":"My
+		// trip"}]";
+
+		String journeyId = getJourneyId(i.getStringExtra(FIELD_ENTITY));
 
 		return new PushNotification(i.getStringExtra(FIELD_TITLE),
 				i.getStringExtra(FIELD_DESCRIPTION),
 				i.getStringExtra(FIELD_AGENCYID),
 				i.getStringExtra(FIELD_ROUTEID),
 				i.getStringExtra(FIELD_ROUTESHORTNAME),
-				i.getStringExtra(FIELD_TRIPID), Integer.parseInt(i
+				i.getStringExtra(FIELD_TRIPID), journeyId, Integer.parseInt(i
 						.getStringExtra(FIELD_DELAY)), from, station, null,
 				false);
+	}
+
+	private String getJourneyId(String json) {
+		try {
+			JSONArray jsarr = new JSONArray(json);
+			JSONObject entity = new JSONObject(jsarr.get(0).toString());
+			return entity.getString("id");
+		} catch (JSONException ex) {
+
+			Log.e(this.getClass().getName(), ex.toString());
+			Log.e(this.getClass().getName() + "CONTENT", json.toString());
+		}
+		return null;
 	}
 
 	public void showSystemNotification(int pushId, PushNotification notif,

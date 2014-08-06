@@ -6,6 +6,10 @@ import android.content.ContentValues;
 
 public class PushNotification {
 
+	private class Entity {
+
+	}
+
 	private Integer mId;
 	private String mTitle;
 	private String mDescription;
@@ -13,16 +17,17 @@ public class PushNotification {
 	private String mRouteId;
 	private String mRouteShortName;
 	private String mTripId;
+	private String mJourneyId;
 	private Integer mDelay;
-	private Integer mFromTime;
+	private Long mFromTime;
 	private String mStation;
 	private Date mDate;
 	private boolean mRead = false;
 
 	public PushNotification(String title, String description, String agencyId,
 			String routeId, String routeShortName, String tripId,
-			Integer delay, Integer fromTime, String station, Date date,
-			boolean read) {
+			String journeyId, Integer delay, Long fromTime, String station,
+			Date date, boolean read) {
 		super();
 		mTitle = title;
 		mDescription = description;
@@ -33,14 +38,15 @@ public class PushNotification {
 		mDelay = delay;
 		mFromTime = fromTime;
 		mStation = station;
+		mJourneyId = journeyId;
 		mDate = date;
 		mRead = read;
 	}
 
 	public PushNotification(Integer id, String title, String description,
 			String agencyId, String routeId, String routeShortName,
-			String tripId, Integer delay, Integer fromTime, String station,
-			Date date, boolean read) {
+			String journeyId, String tripId, Integer delay, Long fromTime,
+			String station, Date date, boolean read) {
 		super();
 		mId = id;
 		mTitle = title;
@@ -52,6 +58,7 @@ public class PushNotification {
 		mDelay = delay;
 		mFromTime = fromTime;
 		mStation = station;
+		mJourneyId = journeyId;
 		mDate = date;
 		mRead = read;
 	}
@@ -74,6 +81,14 @@ public class PushNotification {
 
 	public String getDescription() {
 		return mDescription;
+	}
+
+	public String getJourneyId() {
+		return mJourneyId;
+	}
+
+	public void setJourneyId(String journeyId) {
+		mJourneyId = journeyId;
 	}
 
 	public void setDescription(String description) {
@@ -119,14 +134,12 @@ public class PushNotification {
 	public void setDelay(Integer delay) {
 		mDelay = delay;
 	}
-	
-	
 
-	public Integer getFromTime() {
+	public Long getFromTime() {
 		return mFromTime;
 	}
 
-	public void setFromTime(Integer fromTime) {
+	public void setFromTime(Long fromTime) {
 		mFromTime = fromTime;
 	}
 
@@ -165,6 +178,8 @@ public class PushNotification {
 			out.put(NotificationDBHelper.DATE_KEY, new Date().getTime());
 		if (mId != null)
 			out.put(NotificationDBHelper.ID_KEY, mId);
+		if (mFromTime != null)
+			out.put(NotificationDBHelper.FROMTIME_KEY, mFromTime);
 		if (mStation != null)
 			out.put(NotificationDBHelper.STATION_KEY, mStation);
 
