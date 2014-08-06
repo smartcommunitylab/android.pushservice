@@ -31,7 +31,7 @@ public class NotificationCenter {
 	private final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
 	private final static String FIELD_TRIPID = "content.tripId";
 	private final static String FIELD_DELAY = "content.delay";
-	private final static String FIELD_ENTITY = "entity";
+	private final static String FIELD_ENTITY = "entities";
 	private final static String OPTIONAL_FIELD_FROMTIME = "content.from";
 	private final static String OPTIONAL_FIELD_STATION = "content.station";
 

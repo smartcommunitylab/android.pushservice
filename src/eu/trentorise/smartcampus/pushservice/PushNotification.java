@@ -45,7 +45,7 @@ public class PushNotification {
 
 	public PushNotification(Integer id, String title, String description,
 			String agencyId, String routeId, String routeShortName,
-			String journeyId, String tripId, Integer delay, Long fromTime,
+			String tripId, String journeyId, Integer delay, Long fromTime,
 			String station, Date date, boolean read) {
 		super();
 		mId = id;
@@ -191,6 +191,7 @@ public class PushNotification {
 		out.put(NotificationDBHelper.ROUTEID_KEY, mRouteId);
 		out.put(NotificationDBHelper.ROUTESHORTNAME_KEY, mRouteShortName);
 		out.put(NotificationDBHelper.TRIPID_KEY, mTripId);
+		out.put(NotificationDBHelper.JOURNEY_KEY, mJourneyId);
 
 		return out;
 	}
