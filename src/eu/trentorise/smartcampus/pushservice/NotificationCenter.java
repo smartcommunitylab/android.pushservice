@@ -254,7 +254,7 @@ public class NotificationCenter {
 		} else {
 			ncb.setContentText(notif.getDescription());
 			ncb.setContentTitle(notif.getTitle());
-			ncb.setContentInfo(notif.getDelay() + "");
+			ncb.setContentInfo(notif.getDelay()/60000 + "m");
 		}
 
 		Intent resultIntent = new Intent(mContext, resultActivity);
