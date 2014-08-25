@@ -24,16 +24,16 @@ import android.util.Log;
 
 public class NotificationCenter {
 
-	private final static String FIELD_TITLE = "title";
-	private final static String FIELD_DESCRIPTION = "description";
-	private final static String FIELD_AGENCYID = "content.agencyId";
-	private final static String FIELD_ROUTEID = "content.routeId";
-	private final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
-	private final static String FIELD_TRIPID = "content.tripId";
-	private final static String FIELD_DELAY = "content.delay";
-	private final static String FIELD_ENTITY = "entities";
-	private final static String OPTIONAL_FIELD_FROMTIME = "content.from";
-	private final static String OPTIONAL_FIELD_STATION = "content.station";
+	public final static String FIELD_TITLE = "title";
+	public final static String FIELD_DESCRIPTION = "description";
+	public final static String FIELD_AGENCYID = "content.agencyId";
+	public final static String FIELD_ROUTEID = "content.routeId";
+	public final static String FIELD_ROUTESHORTNAME = "content.routeShortName";
+	public final static String FIELD_TRIPID = "content.tripId";
+	public final static String FIELD_DELAY = "content.delay";
+	public final static String FIELD_ENTITY = "entities";
+	public final static String OPTIONAL_FIELD_FROMTIME = "content.from";
+	public final static String OPTIONAL_FIELD_STATION = "content.station";
 
 	private NotificationDBHelper mDB;
 	private Context mContext;
@@ -203,6 +203,7 @@ public class NotificationCenter {
 		return count;
 	}
 
+	
 	private PushNotification buildPushNotification(Intent i) {
 		String station = null;
 		Long from = null;
@@ -214,20 +215,23 @@ public class NotificationCenter {
 		// String test = "[{"type":"journey","id":"123455476346353","title":"My
 		// trip"}]";
 
-		String journeyId = getJourneyId(i.getStringExtra(FIELD_ENTITY));
-
 		return new PushNotification(i.getStringExtra(FIELD_TITLE),
 				i.getStringExtra(FIELD_DESCRIPTION),
 				i.getStringExtra(FIELD_AGENCYID),
 				i.getStringExtra(FIELD_ROUTEID),
 				i.getStringExtra(FIELD_ROUTESHORTNAME),
-				i.getStringExtra(FIELD_TRIPID), journeyId, Integer.parseInt(i
+				i.getStringExtra(FIELD_TRIPID), getJourneyId(i.getStringExtra(FIELD_ENTITY)), Integer.parseInt(i
 						.getStringExtra(FIELD_DELAY)), from, station, null,
 				false);
 	}
+	
 
-	private String getJourneyId(String json) {
+	public String getJourneyId(String json) {
 		try {
+			if(json==null){
+				return null;
+			}
+			
 			JSONArray jsarr = new JSONArray(json);
 			JSONObject entity = new JSONObject(jsarr.get(0).toString());
 			return entity.getString("id");
