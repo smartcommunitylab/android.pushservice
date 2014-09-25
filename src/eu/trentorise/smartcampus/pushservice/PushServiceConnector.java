@@ -90,4 +90,7 @@ public class PushServiceConnector {
 
 	}
 
+	public static void reset(Context mContext) {
+		GCMRegistrar.unregister(mContext);
+	}
 }
