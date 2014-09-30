@@ -95,6 +95,7 @@ public class PushServiceConnector {
 	}
 
 	public static void reset(Context mContext) {
+		writeRegId(mContext, "");
 		GCMRegistrar.unregister(mContext);
 	}
 	
