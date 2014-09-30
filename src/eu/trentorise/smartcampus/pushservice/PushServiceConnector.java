@@ -2,10 +2,9 @@ package eu.trentorise.smartcampus.pushservice;
 
 import java.util.Map;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
@@ -18,6 +17,9 @@ public class PushServiceConnector {
 	public static final Object SENDER_ID_KEY = "GCM_SENDER_ID";
 	public static final Object APP_ID_KEY = "APP_ID";
 	private static final String TAG = "PushServiceConnector";
+	private static final String PREFS = "pushServicePrefs";
+	private static final int ACCESS = Context.MODE_PRIVATE|Context.CONTEXT_RESTRICTED;
+	private static final String REG_ID = "regId";
 
 	private Context mContext;
 	private String mUserAuthToken;;
@@ -56,9 +58,9 @@ public class PushServiceConnector {
 			GCMRegistrar.checkManifest(mContext);
 
 			// Get the existing registration id, if it exists.
-			regId = GCMRegistrar.getRegistrationId(mContext);
+			regId = readRegId(mContext);//GCMRegistrar.getRegistrationId(mContext);
 
-			if (regId.equals("")) {
+			if (regId == null || regId.equals("")) {
 				if (mConnector != null) {
 					Map<String, Object> mapKey = mConnector
 							.requestPublicConfigurationToPush("core.mobility",
@@ -77,6 +79,7 @@ public class PushServiceConnector {
 						signUserSignature.setRegistrationId(regId);
 						mConnector.registerUserToPush(signUserSignature,
 								"core.mobility", mUserAuthToken);
+						writeRegId(mContext, regId);
 					}
 				}
 			} else {
@@ -85,6 +88,7 @@ public class PushServiceConnector {
 			
 			Log.i("GCM_REGID:", regId);
 		} catch (Exception e) {
+			GCMRegistrar.unregister(mContext);
 			Log.e(TAG, e.toString());
 		}
 
@@ -93,4 +97,14 @@ public class PushServiceConnector {
 	public static void reset(Context mContext) {
 		GCMRegistrar.unregister(mContext);
 	}
+	
+	
+	private static String readRegId(Context ctx) {
+		return ctx.getSharedPreferences(PREFS, ACCESS).getString(REG_ID, "");
+	} 
+	
+	private static void writeRegId(Context ctx, String regId) {
+		ctx.getSharedPreferences(PREFS, ACCESS).edit().putString(REG_ID, regId).commit();
+	} 
+	
 }
