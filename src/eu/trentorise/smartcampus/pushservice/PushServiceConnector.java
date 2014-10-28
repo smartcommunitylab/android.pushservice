@@ -63,7 +63,7 @@ public class PushServiceConnector {
 			if (regId == null || regId.equals("")) {
 				if (mConnector != null) {
 					Map<String, Object> mapKey = mConnector
-							.requestPublicConfigurationToPush("core.mobility",
+							.requestPublicConfigurationToPush(mAppId,
 									mUserAuthToken);
 
 					// find senderid
@@ -75,10 +75,10 @@ public class PushServiceConnector {
 					regId = GCMRegistrar.getRegistrationId(mContext);
 					if (regId != null && regId.length() > 0) {
 						UserSignature signUserSignature = new UserSignature();
-						signUserSignature.setAppName("core.mobility");
+						signUserSignature.setAppName(mAppId);
 						signUserSignature.setRegistrationId(regId);
 						mConnector.registerUserToPush(signUserSignature,
-								"core.mobility", mUserAuthToken);
+								mAppId, mUserAuthToken);
 						writeRegId(mContext, regId);
 					}
 				}
