@@ -35,13 +35,6 @@ Add the permissions to the manifest:
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <!-- GCM connects to Google services -->
     <uses-permission android:name="android.permission.INTERNET" />
-        
-    <!-- GCM requires a Google account -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
-    
-    <uses-permission android:name="android.permission.READ_OWNER_DATA" />
     
     <!-- wake the processor if a GCM message is received -->
 	<uses-permission android:name="android.permission.WAKE_LOCK" />

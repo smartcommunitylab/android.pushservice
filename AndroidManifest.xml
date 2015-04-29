@@ -8,7 +8,6 @@
         android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -17,14 +16,14 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="eu.trentorise.smartcampus.pushservice.permission.C2D_MESSAGE" />
- 
-            <meta-data
-                android:name="SERVER_URL"
-                android:value="https://vas-dev.smartcampuslab.it/core.communicator" />
-            <meta-data
-                android:name="APP_ID"
-                android:value="studymate" />
-    
+
+    <meta-data
+        android:name="SERVER_URL"
+        android:value="https://vas-dev.smartcampuslab.it/core.communicator" />
+    <meta-data
+        android:name="APP_ID"
+        android:value="studymate" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -37,7 +36,7 @@
             <meta-data
                 android:name="USER_AUTH_TOKEN"
                 android:value="b8fcb94d-b4cf-438f-802a-c0a560734c88" />
- 	    <meta-data
+            <meta-data
                 android:name="CLIENT_AUTH_TOKEN"
                 android:value="" />
             <meta-data
